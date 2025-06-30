@@ -80,29 +80,36 @@ exports.deleteBook = (req, res, next) => {
         });
 };
 
-exports.rateBook = (req, res, next) => {
-    const { userId, rating } = req.body;
+exports.rateBook = async (req, res, next) => {
+    try {
+        const requestUserId = req.body.userId
+        const requestRating = req.body.rating
+        const newRating = {
+            userId: requestUserId,
+            grade: requestRating,
+        }
 
-    if (req.auth.userId !== userId) {
-        return res.status(403).json({ message: 'Not authorized' });
+        const book = await Book.findById(req.params.id)
+        const rateUserIdExists = book.ratings.some(
+            (rating) => rating.userId === requestUserId
+        )
+
+        if (
+            requestUserId === book.userId ||
+            (rateUserIdExists && requestRating >= 0 && requestRating <= 5)
+        ) {
+            return res.status(200).json(book)
+        }
+
+        book.ratings.push(newRating)
+
+        const tableRating = book.ratings.map((rating) => rating.grade)
+        book.averageRating =
+            tableRating.reduce((a, b) => a + b, 0) / tableRating.length
+        await book.save()
+
+        return res.status(201).json(book)
+    } catch (error) {
+        res.status(400).json({ error })
     }
-
-    Book.findOne({ _id: req.params.id })
-        .then(book => {
-
-            if (book.userId === req.auth.userId) {
-                return res.status(403).json({ message: 'Vous ne pouvez pas noter votre propre livre' });
-            } else {
-
-                book.ratings.push({ userId, grade: rating });
-
-                const total = book.ratings.reduce((sum, r) => sum + r.grade, 0);
-                book.averageRating = parseFloat((total / book.ratings.length).toFixed(2));
-
-                book.save()
-                    .then(updatedBook => res.status(200).json(updatedBook))
-                    .catch(error => res.status(500).json({ error }));
-            }
-        })
-        .catch(error => res.status(500).json({ message: 'Erreur serveur', error }));
 };
