@@ -1,9 +1,15 @@
 const bcrypt = require('bcrypt');
+const validator = require('validator');
 const jwt = require('jsonwebtoken');
-const User = require ('../models/user');
+const User = require('../models/user');
 
 
 exports.signup = (req, res, next) => {
+
+    if (!validator.isEmail(req.body.email)) {
+        return res.status(400).json({ message: 'Format d\'Email invalide' });
+    }
+    
     bcrypt.hash(req.body.password, 10)
         .then(hash => {
             const user = new User({
@@ -21,7 +27,7 @@ exports.login = (req, res, next) => {
     User.findOne({ email: req.body.email })
         .then(user => {
             if (!user) {
-                return res.status(401).json({ message: 'Login et/ou mot de passe incorrecte'});
+                return res.status(401).json({ message: 'Login et/ou mot de passe incorrecte' });
             }
             bcrypt.compare(req.body.password, user.password)
                 .then(valid => {
@@ -40,4 +46,4 @@ exports.login = (req, res, next) => {
                 .catch(error => res.status(500).json({ error }));
         })
         .catch(error => res.status(500).json({ error }));
- };
+};

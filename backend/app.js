@@ -1,3 +1,5 @@
+require('dotenv').config()
+
 const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
@@ -5,7 +7,7 @@ const userRoutes = require('./routes/user');
 const path = require('path');
 const booksRoutes = require('./routes/books');
 
-mongoose.connect('mongodb+srv://kwnzax:GOKdxacdoDLN1Wxk@projet6cluster.trvfbmx.mongodb.net/?retryWrites=true&w=majority&appName=Projet6Cluster',
+mongoose.connect(`mongodb+srv://${process.env.dataUser}:${process.env.dataPwd}@projet6cluster.trvfbmx.mongodb.net/?retryWrites=true&w=majority&appName=Projet6Cluster`,
   {
     useNewUrlParser: true,
     useUnifiedTopology: true
