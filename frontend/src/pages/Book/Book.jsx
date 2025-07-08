@@ -80,14 +80,20 @@ function Book() {
             </div>
           ) : null}
           <BookInfo book={book} />
-          <BookRatingForm
-            userRated={userRated}
-            userId={connectedUser?.userId}
-            rating={rating}
-            setRating={setRating}
-            setBook={setBook}
-            id={book.id}
-          />
+          {connectedUser?.userId ? (
+            (
+              <BookRatingForm
+                userRated={userRated}
+                userId={connectedUser.userId}
+                rating={rating}
+                setRating={setRating}
+                setBook={setBook}
+                id={book.id}
+              />
+            )
+          ) : (
+            <p>Connectez-vous pour noter ce livre.</p>
+          )}
         </div>
       </div>
       <hr />
